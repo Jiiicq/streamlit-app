@@ -1,29 +1,38 @@
 import streamlit as st
 import pandas as pd
 
-# Cargar los datos
+# Cargar datos
 @st.cache
-def cargar_datos(filepath):
-    data = pd.read_excel(filepath)
+def cargar_datos():
+    data_path = 'CargoFuncionCompetencia.xlsx'
+    data = pd.read_excel(data_path)
     return data
 
-data = cargar_datos('CargoFuncionCompetencia.xlsx')
+data = cargar_datos()
 
-# Filtrar y ordenar los nombres de los cargos
-cargos_unicos = data['Nombre'].drop_duplicates().sort_values()
+# Título de la aplicación
+st.title("Visualizador de Cargos y Funciones")
 
-# Selector de cargos en la interfaz
-cargo_seleccionado = st.selectbox('Selecciona un cargo:', cargos_unicos)
+# Selector de dirección
+direccion_seleccionada = st.selectbox("Selecciona una Dirección", data['idDireccion'].unique())
 
-# Mostrar funciones y competencias asociadas al cargo seleccionado
-if cargo_seleccionado:
-    st.write(f"Funciones y Competencias para el cargo: {cargo_seleccionado}")
-    funciones = data[data['Nombre'] == cargo_seleccionado][['funcion', 'competencia']].drop_duplicates()
-    for _, row in funciones.iterrows():
-        st.subheader(f"Función: {row['funcion']}")
-        competencias = data[(data['Nombre'] == cargo_seleccionado) & (data['funcion'] == row['funcion'])]['competencia']
-        competencias = competencias.drop_duplicates().tolist()
-        st.write("Competencias:")
-        for competencia in competencias:
-            st.write("- " + competencia)
+# Filtrar cargos por dirección seleccionada
+cargos_filtrados = data[data['idDireccion'] == direccion_seleccionada]
+
+# Selector de cargos
+cargo_seleccionado = st.selectbox("Selecciona un Cargo", sorted(cargos_filtrados['Nombre'].unique()))
+
+# Filtrar funciones y competencias por cargo seleccionado
+resultados_finales = cargos_filtrados[cargos_filtrados['Nombre'] == cargo_seleccionado]
+
+# Mostrar funciones
+st.subheader("Funciones:")
+for funcion in resultados_finales['funcion'].unique():
+    st.text(funcion)
+
+# Mostrar competencias
+st.subheader("Competencias:")
+for competencia in resultados_finales['competencia'].unique():
+    st.text(competencia)
+
 
