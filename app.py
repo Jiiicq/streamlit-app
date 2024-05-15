@@ -28,11 +28,11 @@ resultados_finales = cargos_filtrados[cargos_filtrados['Nombre'] == cargo_selecc
 # Mostrar funciones
 st.subheader("Funciones:")
 for funcion in resultados_finales['funcion'].unique():
-    st.text(funcion)
+    st.write(funcion)
 
 # Mostrar competencias
 st.subheader("Competencias:")
 for competencia in resultados_finales['competencia'].unique():
-    st.text(competencia)
+    st.write(competencia)
 
 
