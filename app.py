@@ -2,19 +2,28 @@ import streamlit as st
 import pandas as pd
 
 # Cargar los datos
-data = pd.read_excel('CargoFuncionCompetencia.xlsx')
+@st.cache
+def cargar_datos(filepath):
+    data = pd.read_excel(filepath)
+    return data
 
-# Filtrar las columnas y los registros activos
-data = data[data['Activo'] == 1][['Nombre', 'funcion']].drop_duplicates()
+data = cargar_datos('CargoFuncionCompetencia.xlsx')
 
-# Ordenar los cargos de la A a la Z
-data.sort_values('Nombre', inplace=True)
+# Filtrar y ordenar los nombres de los cargos
+cargos_unicos = data['Nombre'].drop_duplicates().sort_values()
 
-# Crear un selector en la barra lateral para elegir un cargo
-selected_cargo = st.sidebar.selectbox('Seleccione un cargo:', data['Nombre'].unique())
+# Selector de cargos en la interfaz
+cargo_seleccionado = st.selectbox('Selecciona un cargo:', cargos_unicos)
 
-# Mostrar las funciones asociadas al cargo seleccionado
-st.write(f"Funciones para el cargo: {selected_cargo}")
-functions = data[data['Nombre'] == selected_cargo]['funcion']
-for function in functions:
-    st.write("- ", function)
+# Mostrar funciones y competencias asociadas al cargo seleccionado
+if cargo_seleccionado:
+    st.write(f"Funciones y Competencias para el cargo: {cargo_seleccionado}")
+    funciones = data[data['Nombre'] == cargo_seleccionado][['funcion', 'competencia']].drop_duplicates()
+    for _, row in funciones.iterrows():
+        st.subheader(f"Función: {row['funcion']}")
+        competencias = data[(data['Nombre'] == cargo_seleccionado) & (data['funcion'] == row['funcion'])]['competencia']
+        competencias = competencias.drop_duplicates().tolist()
+        st.write("Competencias:")
+        for competencia in competencias:
+            st.write("- " + competencia)
+
